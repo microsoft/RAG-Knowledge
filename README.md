@@ -1,14 +1,11 @@
 # Project
+This project provides tips and techniques for RAG (Retrieval-Augmented Generation).
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
-
-As the maintainer of this project, please make a few updates:
-
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+This project focuses on several key areas:
+1. **Data Preprocessing for RAG**: This includes extracting text data from various document formats (PDF, Word, HTML), Text Standardization and Normalization, and Chunking Optimization for RAG.
+2. **Index Design for Retriever**: This involves creating efficient and scalable indices to improve retrieval speed and accuracy, choosing the right indexing structures, and handling updates to the index.
+3. **Query Optimization**: This includes techniques for crafting effective queries using various search methods such as keyword-based, vector-based, and hybrid approaches. It also covers query expansion techniques to enhance search results such as Hypothetical Document Embeddings (HyDE) methods.
+4. **Evaluation**: This involves setting up benchmarks, selecting appropriate evaluation metrics, and conducting experiments to measure the performance of the RAG system.
 
 ## Contributing
 
