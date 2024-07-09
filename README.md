@@ -1,16 +1,6 @@
-# Best Practices for RAG (Retrieval-Augmented Generation)
+# README
 
 This project provides tips and techniques for RAG (Retrieval-Augmented Generation).
-
-This project focuses on several key areas:
-1. **Data Preprocessing for RAG**: This includes extracting text data from various document formats (PDF, Word, HTML), Text Standardization and Normalization, and Chunking Optimization for RAG.
-2. **Chunking Optimization**: 
-3. **Index Design for Retriever**: This involves creating efficient and scalable indices to improve retrieval speed and accuracy, choosing the right indexing structures, and handling updates to the index.
-4. **Query Optimization**: This includes techniques for crafting effective queries using various search methods such as keyword-based, vector-based, and hybrid approaches. It also covers query expansion techniques to enhance search results such as Hypothetical Document Embeddings (HyDE) methods.
-5. **Evaluation**: This involves setting up benchmarks, selecting appropriate evaluation metrics, and conducting experiments to measure the performance of the RAG system.
-
-
-# README
 
 ## Purpose
 
