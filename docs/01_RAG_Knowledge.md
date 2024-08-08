@@ -1,5 +1,12 @@
 # Best Practices for RAG (Retrieval-Augmented Generation)
 
+- RAG (Retrieval-Augmented Generation) has been extensively developed and validated as a core architecture for generative AI applications.
+- While the concept of RAG is quite simple, achieving applications with usable accuracy levels involves many considerations, and many projects face challenges related to accuracy and development productivity.
+- RAG has the following key components, each requiring appropriate consideration, design, and problem-solving.
+- This document provides practical design and knowledge.
+
+![alt text](images/rag_overview.png)
+
 ## Data Preprocessing
 Tips for data preprocessing to create a search index for RAG
 
@@ -13,10 +20,12 @@ Tips for data preprocessing to create a search index for RAG
   - **Azure:** Azure AI Document Intelligence can be utilized.
 
 #### Document Analysis with Azure AI Document Intelligence
-Azure AI Document Intelligence not only extracts text but also analyzes hierarchical document structures and detects figures. It provides advanced machine learning-based document analysis APIs, and the Layout model offers comprehensive solutions for advanced content extraction and document structure analysis.
+Azure AI Document Intelligence not only extracts text but also analyzes hierarchical document structures and detects figures. The details is [here](https://techcommunity.microsoft.com/t5/ai-azure-ai-services-blog/unlocking-advanced-document-insights-with-azure-ai-document/ba-p/4109675). It provides advanced machine learning-based document analysis APIs, and the Layout model offers comprehensive solutions for advanced content extraction and document structure analysis.
 
 - **Hierarchical Document Structure Analysis:** Supports the retention of document context by splitting documents into sections and subsections in Markdown format. Enables chunking strategies that maintain context, such as semantic chunking.
 - **Figure Detection:** Extracts key properties like boundingRegions, which detail the spatial positions of figures on the page. This allows for the extraction of figures and graphs, enabling a multimodal RAG architecture.
+
+![alt text](images/document_intelligence.png)
 
 ### Text Standardization and Normalization
 If the original data is of low quality or if errors occur during OCR reading, perform data cleaning, standardization, and normalization. Possible methods include traditional rule-based (e.g., regular expressions) and LLM-based approaches. Specific processes include:
@@ -33,6 +42,7 @@ If the original data is of low quality or if errors occur during OCR reading, pe
 ## Chunking Optimization
 In RAG, consider dividing the original document into appropriate sizes (chunking) when inputting data into the search index, taking into account search efficiency and the processing performance of large language models. While recent large language models have significantly increased token input capacity, it is recommended to consider RAG and accurate chunking since accuracy may decrease as context length increases. [Reference article](https://arxiv.org/abs/2402.14848)
 
+![alt text](images/reasoning_over_input.png)
 
 - **Determining Chunking Necessity:**
   - **Cases Requiring Chunking:**
@@ -43,6 +53,9 @@ In RAG, consider dividing the original document into appropriate sizes (chunking
     2. **When Context is Already Divided by Units:** If the document is already divided into multiple units for specific purposes or context, or if it's a FAQ with questions and answers already paired, there’s no need to further divide it, which may reduce the amount of information or consistency.
 
 ### Chunking Considerations
+
+![alt text](images/chunking_strategy.png)
+
 #### When Document Boundaries are Clear
 - **Clear Boundaries:** Create chunks based on clear boundaries such as chapters, sections, headers. This approach ensures that each chunk retains meaningful and contextually coherent segments of the document.
   - **Examples:**
@@ -52,6 +65,11 @@ In RAG, consider dividing the original document into appropriate sizes (chunking
 
 #### When Document Boundaries are Not Clear
 When document boundaries are not clear and determining the correct split points is challenging, consider the following methods:
+
+- **Chunk by page:**
+  - This is a very simple method, but it chunks on a page-by-page basis.
+  - However, accuracy may be affected because of the loss of context for sentences that span pages.
+
 
 - **Overlapping Chunks:**
   - **Context Preservation:** Overlapping chunks can maintain context continuity, which is crucial for long texts where maintaining coherence is important.
@@ -70,7 +88,8 @@ When document boundaries are not clear and determining the correct split points 
       - **Product Specifications:** Clear and concise information about product features.
       - **Short Blog Posts:** Quick and easy to read information segments.
 
-- **Vector Search Considerations:**
+#### Vector Search Considerations:
+
   - **Embedding and Distinguishing Documents:** When using vector search, ensure that the chunks are distinguishable by embedding them effectively.
   - **Embedding Model Features:** Consider the features and dimensions of the embedding model.
   - **Overlap and Chunk Size:** Balance the chunk size and overlap to enhance the searchability and distinguishability of embedded documents.
@@ -80,6 +99,9 @@ When document boundaries are not clear and determining the correct split points 
   - **Contextual Breakpoints:** Use semantic chunking to divide text based on semantic similarities. Identify breakpoints where there are significant changes in similarity.
   - **Tools and Implementations:** Utilize tools such as LangChain’s semantic chunker for precise and context-aware chunking.
     - **Example:** Segment paragraphs or sections where the topic or context shifts significantly, ensuring each chunk remains contextually coherent.
+
+#### Adding Metadata
+**Include Chapter name and Document name in each Chunk:** To increase the discriminative elements, include the Chapter name and Document name in each Chunk. This will make it easier to find information related to specific Chapters or documents during searches.
 
 #### Example Implementation and Tools
 - **Tools for Chunking:**
@@ -95,8 +117,22 @@ By following these detailed guidelines and utilizing the appropriate tools and m
 #### Chunking Evaluation
 Finding the optimal chunk size is challenging. Sample documents and evaluate multiple patterns. Evaluation metrics are detailed in the RAG evaluation design, and tools like LlamaIndex’s Response Evaluation module can efficiently assess performance and response time for various chunk sizes.
 
+### Chunking in Azure
+
+Currently, there are two main methods to implement chunking using Azure services and features.
+
+#### Text Split Skill on Azure AI Search
+
+The text split skill can divide text into chunks. (More details about Azure AI Search skills will be discussed later.) You can specify whether to split the text by sentences or by a specific length of pages. As of now, splitting by section/header information is not supported, offering only simple splitting methods.
+
+#### Document Intelligence
+
+By leveraging the hierarchical structure analysis capabilities of Document Intelligence, you can structure the original document in Markdown format and implement code to split the Markdown headers into chunks. These chunks can then be pushed to the search engine.
+
 ### Selection of Embedding Models
 Text embeddings are numerical representations that capture the semantics or meaning of words, phrases, or entire documents. These embeddings are foundational for many NLP tasks, such as sentiment analysis and text classification.
+
+![alt text](images/selecting_embedding_model.png)
 
 #### Selection Criteria
 When selecting an embedding model, consider the following criteria:
@@ -134,8 +170,10 @@ When selecting an embedding model, consider the following criteria:
 By carefully considering these criteria, you can select an embedding model that optimally balances accuracy, performance, and cost for your specific NLP tasks and applications.
 
 #### Embedding on Azure
-- **Text:** Azure OpenAI offers several embedding models, including `text-embedding-3-small` optimized for latency and storage, and `text-embedding-3-large` for higher accuracy. Embedding models such as Cohere are available in the Azure AI Model Catalog.
-- **Multimodal:** Azure AI Vision provides embedding models for multimodal (text and image) applications.
+- **Text:** Azure OpenAI offers several [embedding models](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#embeddings), including `text-embedding-3-small` optimized for latency and storage, and `text-embedding-3-large` for higher accuracy. Embedding models such as Cohere are available in the Azure AI Model Catalog.
+- **Multimodal:** Azure AI Vision provides [multimodal embedding models](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-image-retrieval) for multimodal (text and image) applications.
+![Azure AI Vision multimodal embedding](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/media/image-retrieval.png)
+
 
 ## Index Design
 Summary of best practices for index design.
@@ -169,7 +207,7 @@ The perspectives on how to partition an index include:
   - Decide whether to include fields like summaries or key phrases.
 - **Fields for Embedding:**
   - Typically, fields where context is important (keywords alone may not be meaningful).
-  - Reference: [Azure Vector Store Documentation](https://learn.microsoft.com/en-us/azure/search/vector-store)
+  - Reference: [Vector storage in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/vector-store)
 - **Analyzer:**
   - An analyzer is necessary for the search engine to interpret queries.
   - **Default Analyzer:** In Azure AI Search, the default is "Standard Lucene Analyzer."
@@ -207,7 +245,9 @@ Reference: [Azure AI Search Data Import Methods](https://learn.microsoft.com/en-
 - **File Update Date:** Determining how to update based on the file's update date can be challenging. It involves identifying which rows need updating based on the same document, title, and update date.
 
 #### Skillsets (AI Enrichment)
-Azure AI Search integrates with Azure AI services through "AI Enrichment" to process content that cannot be searched in its raw form. This is particularly useful for unstructured text, image content, or content requiring language detection and translation.
+Azure AI Search integrates with Azure AI services through **AI Enrichment** to process content that cannot be searched in its raw form. This is particularly useful for unstructured text, image content, or content requiring language detection and translation.
+
+![alt text](images/aisearch_skillset_concepts.png)
 
 ##### Built-in Skillset
 - **Translation and Language Detection:** For multilingual searches.
@@ -268,7 +308,10 @@ Azure AI Search supports several basic search methods:
   - **Reference:** [Azure Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)
 
 ### Advanced Search Methods in Azure AI Search
-Azure AI Search incorporates advanced search methods to build more accurate search solutions:
+Azure AI Search incorporates [advanced search methods](https://techcommunity.microsoft.com/t5/azure-ai-services-blog/azure-cognitive-search-outperforming-vector-search-with-hybrid/ba-p/3929167) to build more accurate search solutions:
+
+![alt text](images/hybrid_search.png)
+
 - **Hybrid Search:**
   - **Description:** Combines multiple search methods, such as full-text search and vector search, to enhance search accuracy by leveraging different characteristics of each method.
   - **Implementation Considerations:**
@@ -296,9 +339,12 @@ In RAG (Retrieval-Augmented Generation), transforming user queries into an appro
 - **Increased Response Time:** This method increases end-to-end response time since the LLM generates answers.
 - **Limitations in Unknown Domains:** Generating answers for unknown domains can lead to inaccuracies, making this approach less recommended for such cases.
 
+![alt text](images/query_hyde.png)
+
 ##### RAG Fusion
 Generate multiple similar queries from the input query and integrate the search results from each.
-- Reference: [Query Transformations](https://blog.langchain.dev/query-transformations/)
+![alt text](images/rag_fusion.png)
+[Reference Article](https://blog.langchain.dev/query-transformations/)
 
 ##### Iterative Retrieval-Generator RAG
 - **Step-by-Step Inference:** Start with a single query and iteratively refine it, using previous inference results as inputs to progressively resolve the user's query.
@@ -321,7 +367,9 @@ Generate multiple similar queries from the input query and integrate the search 
 In RAG (Retrieval Augmented Generation), it is crucial to evaluate each component separately rather than conducting an end-to-end evaluation. Here are the key evaluation targets and their metrics:
 
 #### Retrieval Evaluation
-Evaluate whether the search results contain the expected information.
+Evaluate whether the search results contain the expected information. It has been [reported](https://arxiv.org/pdf/2402.14848) that the accuracy decreases as the number of documents provided as input increases. Additionally, accuracy tends to drop if important documents are positioned in the middle of the prompt, with a preference for documents at the beginning or end. Therefore, a crucial metric is whether the retrieved search results include documents with appropriate answers at the top of the search score rankings.
+
+![alt text](images/llm_performance_with_context.png)
 
 - **Metrics:**
   - **Precision@K:** Measures the proportion of relevant documents in the top K results. This is a critical metric for evaluating the accuracy of search results.

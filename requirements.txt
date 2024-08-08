@@ -1,0 +1,6 @@
+PyMuPDF
+python-docx
+beautifulsoup4
+python-dotenv
+azure-ai-documentintelligence
+openai
