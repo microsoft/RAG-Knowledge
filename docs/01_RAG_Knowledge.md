@@ -241,8 +241,30 @@ In Azure AI Search, both PUSH and PULL methods are available, and the choice bet
 
 Reference: [Azure AI Search Data Import Methods](https://learn.microsoft.com/en-us/azure/search/search-what-is-data-import)
 
-#### Update Timing
-- **File Update Date:** Determining how to update based on the file's update date can be challenging. It involves identifying which rows need updating based on the same document, title, and update date.
+#### Update Strategy
+
+- Since source documents may be updated, it's important to plan how the index will be refreshed.
+- During development, it's common to delete and rebuild the index as you iterate on the index design.
+- However, once the index is in production, deleting it becomes difficult. In such cases, consider using incremental indexing or parallel indexing.
+
+##### Incremental Indexing: Using the PUSH Model with Azure AI Search
+
+- When using the PUSH model via REST API/Azure SDK, the `mergeOrUpload` action is commonly employed. This action performs a merge if the document already exists or an upload if it is new, making it the most typical action for incremental updates.
+- A unique document key assigned to each document is necessary during updates.
+- To keep track of document changes, consider adding fields to the index such as file update dates or file paths.
+
+##### Incremental Indexing: Using Azure AI Search Indexers
+
+- If using an Azure AI Search indexer, and if change detection is supported by the data source, the indexer can detect underlying data changes. It processes only new or updated documents with each run, leaving unchanged content as is.
+- For example, for indexed content generated from Azure Storage, change detection is performed automatically, as the indexer tracks the last update using timestamps embedded in Azure Storage objects and files.
+  - Note, however, that deletion detection is not supported. You need to implement data deletion as described in the [deletion detection documentation](https://learn.microsoft.com/en-us/azure/search/search-howto-index-changed-deleted-blobs?tabs=portal).
+
+##### Parallel Indexing
+
+- Parallel indexing involves creating a new index separate from the production index for development and testing purposes.
+- This approach allows you to safely develop and test without impacting the existing index.
+- However, this method temporarily creates multiple indexes, which may increase costs.
+- In Azure AI Search, using an [index alias](https://learn.microsoft.com/en-us/azure/search/search-how-to-alias?tabs=rest) is recommended to swap in the new index without requiring changes to application code.
 
 #### Skillsets (AI Enrichment)
 Azure AI Search integrates with Azure AI services through **AI Enrichment** to process content that cannot be searched in its raw form. This is particularly useful for unstructured text, image content, or content requiring language detection and translation.
