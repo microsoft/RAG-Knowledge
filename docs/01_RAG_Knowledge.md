@@ -517,3 +517,7 @@ Azure AI Studio supports the [evaluation of generative AI applications](https://
 ![alt text](images/genai_evaluation_aistudio.png)
 
 Azure AI Studio recommends starting with manual evaluation before proceeding to automated evaluation. Automated evaluation supports large-scale measurement of system quality and safety, facilitating continuous assessment. Additionally, using AI-assisted metrics allows for evaluation even in the absence of ground truth.
+
+You can check the evaluation results from the Azure AI Studio dashboard. You can visualize the overall evaluation for multiple data sets, and you can also check the detailed results for each individual data set.
+
+![alt text](images/eval_ai_studio.png)
